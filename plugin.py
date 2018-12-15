@@ -85,7 +85,7 @@ class BasePlugin:
         self.myIP = s.getsockname()[0]
         s.close()
         Domoticz.Debug("My IP is " + self.myIP)
-	Domoticz.Log("Nuki plugin started on IP " + self.myIP + " and port " + str(self.callbackPort))
+        Domoticz.Log("Nuki plugin started on IP " + self.myIP + " and port " + str(self.callbackPort))
 
         req = 'http://' + self.bridgeIP + ':8080/list?token=' + self.bridgeToken
         Domoticz.Debug('REQUESTING ' + req)
@@ -125,6 +125,8 @@ class BasePlugin:
                 else:
                     batt = 255
 
+                nval = -1
+                sval = "Unknown"
                 if (resp[i]["lastKnownState"]["state"] == 1):
                     sval = 'Locked'
                     nval = 1
@@ -137,8 +139,9 @@ class BasePlugin:
             DumpConfigToLog()
 	
 #           check if callback exists and, if not, create
-            req = 'http://' + self.bridgeIP + ':8080/callback/list&token=' + self.bridgeToken
+            req = 'http://' + self.bridgeIP + ':8080/callback/list?token=' + self.bridgeToken
             Domoticz.Debug('checking callback ' + req)
+            found = False
             try:
                 resp = urllib.request.urlopen(req).read()
             except HTTPError as e:
@@ -152,7 +155,6 @@ class BasePlugin:
                 urlNeeded = 'http://' + self.myIP + ':' + self.callbackPort
                 num=len(resp["callbacks"])
                 Domoticz.Debug("Found callbacks: " + str(num))
-                found = False
                 if num > 0:
                     for i in range (num):
                         if resp["callbacks"][i]["url"] == urlNeeded:
@@ -214,7 +216,7 @@ class BasePlugin:
         else:
             batt = 255
 
-	Domoticz.Log(self.lockNames[foundlock] + " requests update: " + Response["stateName"])
+        Domoticz.Log(self.lockNames[foundlock] + " requests update: " + Response["stateName"])
         if (Response["state"] == 1):
             Domoticz.Debug(self.lockNames[foundlock] + " is LOCKED ")
             sval = 'Locked'
